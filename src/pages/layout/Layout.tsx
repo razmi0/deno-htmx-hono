@@ -4,7 +4,10 @@ export const Layout = ({ children, title }: { children: any; title: string }) =>
     return (
         <html lang="en">
             <Head>{title}</Head>
-            <body>{children}</body>
+            <body>
+                {children}
+                <footer></footer>
+            </body>
         </html>
     );
 };
