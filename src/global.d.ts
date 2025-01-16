@@ -8,3 +8,11 @@ declare module "hono/jsx" {
         interface HTMLAttributes extends HtmxAttributes {}
     }
 }
+
+declare global {
+    type Todo = {
+        id: number;
+        title: string;
+        completed: boolean;
+    };
+}
