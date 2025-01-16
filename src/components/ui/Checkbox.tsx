@@ -1,4 +1,4 @@
-export const Completed = ({ checked }: { checked?: boolean }) => {
+export const Checkbox = ({ checked }: { checked?: boolean }) => {
     return (
         <label class="flex justify-center items-center">
             <input
