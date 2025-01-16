@@ -24,7 +24,6 @@ export const CounterPage = ({ bigTitle }: { bigTitle: string }) => {
                 </p>
                 <Counter id="counter" hxPath="counter" />
             </main>
-            <footer></footer>
         </Fragment>
     );
 };

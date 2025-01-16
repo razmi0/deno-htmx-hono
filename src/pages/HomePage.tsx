@@ -8,7 +8,6 @@ export const HomePage = ({ bigTitle }: { bigTitle: string }) => {
             <main>
                 <h1>{bigTitle}</h1>
             </main>
-            <footer></footer>
         </Fragment>
     );
 };
