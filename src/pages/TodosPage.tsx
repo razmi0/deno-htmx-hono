@@ -1,52 +1,77 @@
 import { Header } from "@/components/Header.tsx";
-import { Todos, TodosContainer } from "@components/Todo.tsx";
-import { Hono } from "hono";
+import db from "@/db/index.ts";
+import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
+import { Container, Todo } from "@components/Todo.tsx";
+import { Context, Hono } from "hono";
 import { Fragment } from "hono/jsx";
+import { logger } from "hono/logger";
 
-const todos = [
-    { id: 1, title: "Learn Hono", completed: false },
-    { id: 2, title: "Learn Tailwind", completed: true },
-    { id: 3, title: "Learn HTMX", completed: false },
-    { id: 4, title: "Learn Deno", completed: true },
-];
+const parseFd = async <T,>(c: Context): Promise<T> => {
+    const formdata = await c.req.formData();
+    return Object.fromEntries([...formdata.entries()]) as T;
+};
+
+type TodoRequest = {
+    title: string;
+    completed: "on" | undefined;
+};
+
+const TodoForm = ({ id, title, completed }: Todo) => {
+    return (
+        <form
+            hx-post={`/todos/${id}`}
+            hx-swap={"outerHTML"}
+            hx-trigger={"change"}
+            hx-on-htmx-before-request={"console.log(event);console.log(this);"}>
+            <Todo title={title} completed={completed} />
+            <button class="bg-transparent p-0" type="submit" hx-delete={`/todos/${id}`} hx-target="closest form">
+                <DeleteIcon className="size-5" />
+            </button>
+        </form>
+    );
+};
 
 export default new Hono()
+    .use(logger())
     /* POST todo */
-    .post("/", async (c) => {
-        const parsed = (await c.req.parseBody()) as Partial<Omit<Todos, "id">>;
+    .post("/:id", async (c) => {
+        const todos = await db.readTodos();
+        if (!todos) throw new Error("Failed to read todos !");
 
-        const id = todos.length + 1;
-        const title = parsed.title || "blank";
-        const completed = !!parsed.completed;
-        todos.push({ id, title, completed });
+        const { title, completed } = await parseFd<TodoRequest>(c);
+        const newTodo = {
+            id: parseInt(c.req.param("id")),
+            title,
+            completed: !!completed, // convert to boolean the TodoRequest.completed
+        };
 
-        return c.render(<TodosContainer todos={todos} />);
+        const updated = await db.updateTodo(newTodo);
+        if (!updated) throw new Error("Failed to update todo !");
+
+        return c.render(<TodoForm {...newTodo} />);
     })
-    .delete("/delete/:id", (c) => {
-        const { id } = c.req.param();
-        todos.splice(
-            todos.findIndex((todo) => todo.id === parseInt(id)),
-            1
-        );
-        return c.render(<TodosContainer todos={todos} />);
-    })
-    .put("/update/:id", async (c) => {
-        const { id } = c.req.param();
-        const parsed = (await c.req.parseBody()) as Partial<Omit<Todos, "id">>;
 
-        const index = todos.findIndex((todo) => todo.id === parseInt(id));
-        todos[index] = { ...todos[index], ...parsed };
+    /* DELETE todo */
+    .delete("/:id", async (c) => {
+        const todos = await db.readTodos();
+        if (!todos) throw new Error("Failed to read todos !");
 
-        return c.render(<TodosContainer todos={todos} />);
+        const id = parseInt(c.req.param("id"));
+
+        const deleted = db.deleteTodo(id);
+        if (!deleted) throw new Error("Failed to delete todo !");
+
+        return c.render(<span class={"hidden"}></span>);
     });
 
-export const TodosPage = ({ bigTitle }: { bigTitle: string }) => {
+export const TodosPage = async ({ bigTitle }: { bigTitle: string }) => {
+    const todos = await db.readTodos();
     return (
         <Fragment>
             <Header />
             <main>
                 <h1>{bigTitle}</h1>
-                <TodosContainer todos={todos} />
+                <Container>{todos ? todos.map((td) => <TodoForm {...td} />) : "No todos found"}</Container>
             </main>
             <footer></footer>
         </Fragment>
