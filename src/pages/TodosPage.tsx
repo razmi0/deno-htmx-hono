@@ -1,29 +1,36 @@
 import { Header } from "@/components/Header.tsx";
 import db from "@/db/index.ts";
+import { getBodyFunction, parseFd } from "@/utils.ts";
 import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
-import { Container, Todo } from "@components/Todo.tsx";
-import { Context, Hono } from "hono";
-import { Fragment } from "hono/jsx";
+import { Container } from "@components/ui/Container.tsx";
+import { Hono } from "hono";
 import { logger } from "hono/logger";
-
-const parseFd = async <T,>(c: Context): Promise<T> => {
-    const formdata = await c.req.formData();
-    return Object.fromEntries([...formdata.entries()]) as T;
-};
 
 type TodoRequest = {
     title: string;
     completed: "on" | undefined;
 };
 
-const TodoForm = ({ id, title, completed }: Todo) => {
+/* <form
+                    class={"grid grid-cols-2 gap-2 justify-items-end text-left"}
+                    hx-post="/todos"
+                    hx-target="formTarget">
+                    <AddTodo formTarget={formTarget} />
+                </form> */
+
+const Todo = ({ id, title, completed }: Todo) => {
     return (
         <form
-            hx-post={`/todos/${id}`}
+            class={"flex items-center justify-between gap-3"}
+            hx-put={`/todos/${id}`}
             hx-swap={"outerHTML"}
             hx-trigger={"change"}
-            hx-on-htmx-before-request={"console.log(event);console.log(this);"}>
-            <Todo title={title} completed={completed} />
+            hx-on-htmx-before-request={getBodyFunction((event) => {
+                console.log(event); // event is a htmx event
+                console.log(this); // this is the form element
+            })}>
+            <input type="text" value={title} name="title" class="bg-transparent p-0" />
+            <input type="checkbox" name="completed" checked={completed} />
             <button
                 class="bg-transparent p-0"
                 type="submit"
@@ -37,9 +44,10 @@ const TodoForm = ({ id, title, completed }: Todo) => {
 };
 
 export default new Hono()
+    .basePath("/todos")
     .use(logger())
     /* POST todo */
-    .post("/:id", async (c) => {
+    .put("/:id", async (c) => {
         const todos = await db.readTodos();
         if (!todos) throw new Error("Failed to read todos !");
 
@@ -53,7 +61,7 @@ export default new Hono()
         const updated = await db.updateTodo(newTodo);
         if (!updated) throw new Error("Failed to update todo !");
 
-        return c.render(<TodoForm {...newTodo} />);
+        return c.render(<Todo {...newTodo} />);
     })
 
     /* DELETE todo */
@@ -72,13 +80,15 @@ export default new Hono()
 export const TodosPage = async ({ bigTitle }: { bigTitle: string }) => {
     const todos = await db.readTodos();
     return (
-        <Fragment>
+        <>
             <Header />
             <main>
                 <h1>{bigTitle}</h1>
-                <Container>{todos ? todos.map((td) => <TodoForm {...td} />) : "No todos found"}</Container>
+                <Container>
+                    {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
+                </Container>
             </main>
             <footer></footer>
-        </Fragment>
+        </>
     );
 };
