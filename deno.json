@@ -8,16 +8,19 @@
         "@/": "./src/",
         "@pages/": "./src/pages/",
         "@components/": "./src/components/",
-        "@layout/": "./src/pages/layout/"
+        "@layout/": "./src/pages/layout/",
+        "typed-htmx": "npm:typed-htmx@^0.3.1"
     },
     "tasks": {
-        "start": "deno run --allow-net --allow-read --watch server.ts",
+        "start": "deno run --allow-net --allow-read --allow-write --watch server.ts",
         "bundle": "deno run --allow-read --allow-write --allow-env --allow-net --allow-run --watch src/client/lib/bundle.ts",
         "tw": "npx tailwindcss -i ./src/client/index.css -o ./public/index.css --watch",
-        "dev": "deno run start && deno run bundle && deno run tw"
+        "dev": "deno run start && deno run bundle && deno run tw",
+        "migrate": "deno run --allow-read --allow-write ./src/db/migrate.ts"
     },
     "compilerOptions": {
         "jsx": "precompile",
-        "jsxImportSource": "hono/jsx"
+        "jsxImportSource": "hono/jsx",
+        "lib": ["deno.window", "deno.dom"]
     }
 }

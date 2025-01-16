@@ -17,7 +17,8 @@
     "npm:postcss@^8.4.49": "8.4.49",
     "npm:tailwindcss@*": "3.4.17_postcss@8.4.49",
     "npm:tailwindcss@3.4.17": "3.4.17_postcss@8.4.49",
-    "npm:tailwindcss@^3.4.17": "3.4.17_postcss@8.4.49"
+    "npm:tailwindcss@^3.4.17": "3.4.17_postcss@8.4.49",
+    "npm:typed-htmx@~0.3.1": "0.3.1"
   },
   "jsr": {
     "@hono/hono@4.6.16": {
@@ -733,6 +734,15 @@
     "ts-interface-checker@0.1.13": {
       "integrity": "sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA=="
     },
+    "typed-html@3.0.1": {
+      "integrity": "sha512-JKCM9zTfPDuPqQqdGZBWSEiItShliKkBFg5c6yOR8zth43v763XkAzTWaOlVqc0Y6p9ee8AaAbipGfUnCsYZUA=="
+    },
+    "typed-htmx@0.3.1": {
+      "integrity": "sha512-6WSPsukTIOEMsVbx5wzgVSvldLmgBUVcFIm2vJlBpRPtcbDOGC5y1IYrCWNX1yUlNsrv1Ngcw4gGM8jsPyNV7w==",
+      "dependencies": [
+        "typed-html"
+      ]
+    },
     "update-browserslist-db@1.1.2_browserslist@4.24.4": {
       "integrity": "sha512-PPypAm5qvlD7XMZC3BujecnaOxwhrtoFR+Dqkk5Aa/6DssiH0ibKoketaj9w8LP7Bont1rYeoV5plxD7RTEPRg==",
       "dependencies": [
@@ -782,7 +792,8 @@
       "npm:autoprefixer@^10.4.20",
       "npm:htmx.org@2.0.4",
       "npm:postcss@^8.4.49",
-      "npm:tailwindcss@^3.4.17"
+      "npm:tailwindcss@^3.4.17",
+      "npm:typed-htmx@~0.3.1"
     ]
   }
 }
