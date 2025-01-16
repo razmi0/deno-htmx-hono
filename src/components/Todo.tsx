@@ -1,33 +1,6 @@
 // import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
 // import { PlusIcon } from "@components/icons/PlusIcon.tsx";
 
-export type Todo = {
-    id: number;
-    title: string;
-    completed: boolean;
-};
-
-export const Container = ({ children }: { children: any }) => {
-    return <section class="rounded-lg ring-1 ring-stone-400 py-2 px-4 bg-stone-700 space-y-1">{children}</section>;
-    {
-        /* <form
-                    class={"grid grid-cols-2 gap-2 justify-items-end text-left"}
-                    hx-post="/todos"
-                    hx-target="formTarget">
-                    <AddTodo formTarget={formTarget} />
-                </form> */
-    }
-};
-
-export const Todo = ({ title, completed }: Omit<Todo, "id">) => {
-    return (
-        <>
-            <input type="text" value={title} name="title" class="bg-transparent p-0" />
-            <input type="checkbox" name="completed" checked={completed} />
-        </>
-    );
-};
-
 // const Item = ({ title, completed, id, formTarget }: Todos & { formTarget: `form#${string}` }) => {
 //     const ItemCheckbox = () => (
 //         <input
