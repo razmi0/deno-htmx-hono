@@ -3,6 +3,7 @@ import db from "@/db/index.ts";
 import { getBodyFunction, parseFd } from "@/utils.ts";
 import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
 import { Container } from "@components/ui/Container.tsx";
+import { Layout } from "@pages/layout/Layout.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 
@@ -44,8 +45,24 @@ const Todo = ({ id, title, completed }: Todo) => {
 };
 
 export default new Hono()
-    .basePath("/todos")
+    .basePath("/")
     .use(logger())
+    /* GET todos page */
+    .get("/", async (c) => {
+        const todos = await db.readTodos();
+        return c.render(
+            <Layout title="Todos">
+                <Header />
+                <main>
+                    <h1>Todos</h1>
+                    <Container>
+                        {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
+                    </Container>
+                </main>
+                <footer></footer>
+            </Layout>
+        );
+    })
     /* POST todo */
     .put("/:id", async (c) => {
         const todos = await db.readTodos();
@@ -76,19 +93,3 @@ export default new Hono()
 
         return new Response();
     });
-
-export const TodosPage = async ({ bigTitle }: { bigTitle: string }) => {
-    const todos = await db.readTodos();
-    return (
-        <>
-            <Header />
-            <main>
-                <h1>{bigTitle}</h1>
-                <Container>
-                    {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
-                </Container>
-            </main>
-            <footer></footer>
-        </>
-    );
-};
