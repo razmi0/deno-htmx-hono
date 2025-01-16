@@ -1,5 +1,4 @@
 import db from "@/db/index.ts";
-import { Todo } from "@components/Todo.tsx";
 
 const askReset = Deno.args[0] === "--reset";
 const limit = Deno.args[1] ? parseInt(Deno.args[1]) : 10;
