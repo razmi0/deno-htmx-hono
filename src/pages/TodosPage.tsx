@@ -2,7 +2,7 @@ import { Header } from "@/components/Header.tsx";
 import db from "@/db/index.ts";
 import { getBodyFunction, parseFd } from "@/utils.ts";
 import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
-import { Container } from "@components/ui/Container.tsx";
+import { Container as Card } from "@components/ui/Container.tsx";
 import { Layout } from "@pages/layout/Layout.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
@@ -20,27 +20,35 @@ type TodoRequest = {
                 </form> */
 
 const Todo = ({ id, title, completed }: Todo) => {
+    /* Executed in client side
+     * event is a htmx event
+     * this is the form element */
+    const onBeforeRequest = (event: Event) => {
+        console.log(event);
+        console.log(this);
+    };
+
     return (
-        <form
-            class={"flex items-center justify-between gap-3"}
-            hx-put={`/todos/${id}`}
-            hx-swap={"outerHTML"}
-            hx-trigger={"change"}
-            hx-on-htmx-before-request={getBodyFunction((event) => {
-                console.log(event); // event is a htmx event
-                console.log(this); // this is the form element
-            })}>
-            <input type="text" value={title} name="title" class="bg-transparent p-0" />
-            <input type="checkbox" name="completed" checked={completed} />
-            <button
-                class="bg-transparent p-0"
-                type="submit"
-                hx-delete={`/todos/${id}`}
-                hx-target="closest form"
-                hx-swap="outerHTML:beforebegin">
-                <DeleteIcon className="size-5" />
-            </button>
-        </form>
+        <Card id={`todo-${id}`}>
+            <form
+                class={"flex items-center justify-between gap-3"}
+                hx-put={`/todos/${id}`}
+                hx-swap={"outerHTML"}
+                hx-trigger={"change"}
+                hx-target={`#todo-${id}`}
+                hx-on-htmx-before-request={getBodyFunction(onBeforeRequest)}>
+                <input type="text" value={title} name="title" class="bg-transparent p-0 w-[40ch]" />
+                <input type="checkbox" name="completed" checked={completed} />
+                <button
+                    class="bg-transparent p-0"
+                    type="submit"
+                    hx-delete={`/todos/${id}`}
+                    hx-target={`#todo-${id}`}
+                    hx-swap="outerHTML">
+                    <DeleteIcon className="size-5" />
+                </button>
+            </form>
+        </Card>
     );
 };
 
@@ -55,11 +63,8 @@ export default new Hono()
                 <Header />
                 <main>
                     <h1>Todos</h1>
-                    <Container>
-                        {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
-                    </Container>
+                    {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
                 </main>
-                <footer></footer>
             </Layout>
         );
     })
