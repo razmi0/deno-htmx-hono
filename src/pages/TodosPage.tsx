@@ -24,7 +24,12 @@ const TodoForm = ({ id, title, completed }: Todo) => {
             hx-trigger={"change"}
             hx-on-htmx-before-request={"console.log(event);console.log(this);"}>
             <Todo title={title} completed={completed} />
-            <button class="bg-transparent p-0" type="submit" hx-delete={`/todos/${id}`} hx-target="closest form">
+            <button
+                class="bg-transparent p-0"
+                type="submit"
+                hx-delete={`/todos/${id}`}
+                hx-target="closest form"
+                hx-swap="outerHTML:beforebegin">
                 <DeleteIcon className="size-5" />
             </button>
         </form>
@@ -61,7 +66,7 @@ export default new Hono()
         const deleted = db.deleteTodo(id);
         if (!deleted) throw new Error("Failed to delete todo !");
 
-        return c.render(<span class={"hidden"}></span>);
+        return new Response();
     });
 
 export const TodosPage = async ({ bigTitle }: { bigTitle: string }) => {
