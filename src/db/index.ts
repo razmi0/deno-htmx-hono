@@ -28,7 +28,7 @@ export default {
         return await safe(async () => {
             const content = await read();
             const decoded = decode(content);
-            return JSON.parse(decoded);
+            return JSON.parse(decoded || "[]");
         });
     },
 
