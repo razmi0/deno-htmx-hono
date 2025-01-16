@@ -25,7 +25,7 @@ const Todos = () => (
 
 export default new Hono()
     .route("/counter", counterRoutes)
-    .route("/todos", todosRoutes)
+    .route("/", todosRoutes)
     .get("/*", jsxRenderer())
     .get("/", (c) => c.render(<Home />))
     .get("/counter", (c) => c.render(<Counter />))
