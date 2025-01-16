@@ -55,7 +55,7 @@ export default {
     /* Add a todo */
     addTodo: async (todo: Todo): Promise<Todo[] | false> => {
         return await safe(async () => {
-            const oldTodos = JSON.parse(decode(await read()));
+            const oldTodos = JSON.parse(decode(await read()) || "[]");
             const newTodos = [...oldTodos, todo];
             await write(JSON.stringify(newTodos));
             return newTodos;
