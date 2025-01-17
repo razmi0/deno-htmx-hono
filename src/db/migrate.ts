@@ -8,18 +8,12 @@ ensureFileSync(db.JSON_PATH);
 // reset the todos
 const askReset = Deno.args[0] === "--reset";
 
-// limit the number of todos generated
+// limit the number of todos generated (default 10)
 const limit = Deno.args[1] ? parseInt(Deno.args[1]) : 10;
 
 // reset the todos
 if (askReset) {
-    const todos = await db.readTodos();
-    if (!todos) throw new Error("[RESETING] : Failed to read todos in migration !");
-    const ids = todos.map((todo) => todo.id);
-    for (const id of ids) {
-        const newTodos = await db.deleteTodo(id);
-        if (!newTodos) throw new Error(`[RESETING] : Failed to delete todo ${id} in migration !`);
-    }
+    Deno.writeFileSync(db.JSON_PATH, new Uint8Array());
     console.log("[RESETING] : Done !");
 }
 
@@ -47,7 +41,7 @@ function* todoGenerator(): Generator<Todo> {
     }
 }
 
-// Add todos one by one over IteratorObject range of limit
+// Add todos one by one over IteratorObject limit as range
 for (const todo of todoGenerator().take(limit)) {
     const newTodos = await db.addTodo(todo);
     if (!newTodos) throw new Error("Failed to update todo in migration !");
