@@ -11,7 +11,7 @@ const app = new Hono()
     .get(
         "/*",
         serveStatic({
-            root: "./public",
+            root: ".client",
         })
     );
 
