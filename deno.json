@@ -13,12 +13,14 @@
     },
     "tasks": {
         "start": "deno run --allow-net --allow-read --allow-write --watch server.ts",
-        "bundle": "deno run --allow-read --allow-write --allow-env --allow-net --allow-run --watch src/client/lib/bundle.ts",
+        "bundle": "deno run --allow-read --allow-write --allow-env --allow-net --allow-run  bundle.ts",
         "tw": "npx tailwindcss -i ./src/client/index.css -o ./public/index.css --watch",
         "dev": "deno run start && deno run bundle && deno run tw",
         "migrate": "deno run --allow-read --allow-write ./src/db/migrate.ts"
     },
     "compilerOptions": {
+        "noImplicitAny": false,
+
         "jsx": "precompile",
         "jsxImportSource": "hono/jsx",
         "lib": ["deno.window", "deno.dom"]
