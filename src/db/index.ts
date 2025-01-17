@@ -4,11 +4,11 @@ type Todo = {
     completed: boolean;
 };
 
-const safe = <T>(fn: () => T): T | false => {
+const safe = <T>(fn: () => T, tag: string = ""): T | false => {
     try {
         const t1 = performance.now();
         const data = fn();
-        console.log("Time taken: ", (performance.now() - t1).toFixed(3), "ms");
+        console.log(`[${tag}] Time taken: `, (performance.now() - t1).toFixed(3), "ms");
         return data;
     } catch (error) {
         console.error(error);
@@ -30,7 +30,7 @@ export default {
             const content = await read();
             const decoded = decode(content);
             return JSON.parse(decoded || "[]");
-        });
+        }, "readTodos");
     },
 
     /* Update a todo */
@@ -40,7 +40,7 @@ export default {
             const newTodos = oldTodos.map((oldTodo: Todo) => (oldTodo.id === todo.id ? todo : oldTodo));
             await write(JSON.stringify(newTodos));
             return newTodos;
-        });
+        }, "updateTodo");
     },
 
     /* Delete a todo */
@@ -50,7 +50,7 @@ export default {
             const newTodos = oldTodos.filter((oldTodo: Todo) => oldTodo.id !== id);
             await write(JSON.stringify(newTodos));
             return newTodos;
-        });
+        }, "deleteTodo");
     },
 
     /* Add a todo */
@@ -60,6 +60,6 @@ export default {
             const newTodos = [...oldTodos, todo];
             await write(JSON.stringify(newTodos));
             return newTodos;
-        });
+        }, "addTodo");
     },
 };
