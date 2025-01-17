@@ -16,13 +16,14 @@ const safe = <T>(fn: () => T): T | false => {
     }
 };
 
-const jsonPath = "src/db/todos.json";
+export const JSON_PATH = "src/db/todos.json";
 const encode = (input?: string): Uint8Array => new TextEncoder().encode(input || "");
 const decode = (input: Uint8Array): string => new TextDecoder().decode(input);
-const write = (input: string): Promise<void> => Deno.writeFile(jsonPath, encode(input));
-const read = (): Promise<Uint8Array> => Deno.readFile(jsonPath);
+const write = (input: string): Promise<void> => Deno.writeFile(JSON_PATH, encode(input));
+const read = (): Promise<Uint8Array> => Deno.readFile(JSON_PATH);
 
 export default {
+    JSON_PATH,
     /* Read all todos */
     readTodos: async (): Promise<Todo[] | false> => {
         return await safe(async () => {
