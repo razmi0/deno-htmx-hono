@@ -20,7 +20,7 @@ export default {
     /* Update a todo */
     updateTodo: async (todo: Todo): Promise<Todo[] | false> => {
         return await safe(async () => {
-            const oldTodos = JSON.parse(decode(await read()));
+            const oldTodos = JSON.parse(decode(await read()) || "[]");
             const newTodos = oldTodos.map((oldTodo: Todo) => (oldTodo.id === todo.id ? todo : oldTodo));
             await write(JSON.stringify(newTodos));
             return newTodos;
@@ -30,7 +30,7 @@ export default {
     /* Delete a todo */
     deleteTodo: async (id: number): Promise<Todo[] | false> => {
         return await safe(async () => {
-            const oldTodos = JSON.parse(decode(await read()));
+            const oldTodos = JSON.parse(decode(await read()) || "[]");
             const newTodos = oldTodos.filter((oldTodo: Todo) => oldTodo.id !== id);
             await write(JSON.stringify(newTodos));
             return newTodos;
