@@ -35,19 +35,16 @@ htmx.onLoad(function (content) {
 
 document.body.addEventListener("keydown", function (evt) {
     if (evt.key !== "Enter") return;
-
     evt.preventDefault();
-
     const target = evt.target as HTMLElement;
     const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
-
     if (!isInput) return;
-
     target.blur();
     const nextInput = target.closest("article")?.nextElementSibling?.querySelector("input") as HTMLInputElement;
-
     if (!nextInput) {
-        (document.querySelector(`article input`) as HTMLInputElement)?.focus();
+        const firstInput = document.querySelector(`article input`) as HTMLInputElement;
+        if (!firstInput) return;
+        firstInput.focus();
     }
 
     nextInput.focus();
