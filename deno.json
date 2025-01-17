@@ -23,6 +23,6 @@
 
         "jsx": "precompile",
         "jsxImportSource": "hono/jsx",
-        "lib": ["deno.window", "deno.dom"]
+        "lib": ["deno.window", "deno.dom", "dom"]
     }
 }
