@@ -1,20 +1,4 @@
-type Todo = {
-    id: number;
-    title: string;
-    completed: boolean;
-};
-
-const safe = <T>(fn: () => T, tag: string = ""): T | false => {
-    try {
-        const t1 = performance.now();
-        const data = fn();
-        console.log(`[${tag}] Time taken: `, (performance.now() - t1).toFixed(3), "ms");
-        return data;
-    } catch (error) {
-        console.error(error);
-        return false;
-    }
-};
+import { safe } from "@/utils.ts";
 
 export const JSON_PATH = "src/db/todos.json";
 const encode = (input?: string): Uint8Array => new TextEncoder().encode(input || "");
