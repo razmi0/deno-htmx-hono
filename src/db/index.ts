@@ -37,6 +37,21 @@ export default {
         }, "deleteTodo");
     },
 
+    /* Create a todo */
+    createTodo: async (todo: Partial<Todo>): Promise<number | false> => {
+        return await safe(async () => {
+            const oldTodos = JSON.parse(decode(await read()) || "[]");
+            const newTodo = {
+                completed: todo.completed || false,
+                title: todo.title || "blank",
+                id: oldTodos.length + 1,
+            };
+            const newTodos = [...oldTodos, newTodo];
+            await write(JSON.stringify(newTodos));
+            return newTodo.id;
+        }, "createTodo");
+    },
+
     /* Add a todo */
     addTodo: async (todo: Todo): Promise<Todo[] | false> => {
         return await safe(async () => {
