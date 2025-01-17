@@ -18,3 +18,18 @@ export const parseFd = async <T>(c: Context): Promise<T> => {
     const formdata = await c.req.formData();
     return Object.fromEntries([...formdata.entries()]) as T;
 };
+
+/**
+ * @description Safe function execution AND measure time taken
+ */
+export const safe = <T>(fn: () => T, tag: string = ""): T | false => {
+    try {
+        const t1 = performance.now();
+        const data = fn();
+        console.log(`[${tag}] Time taken: `, (performance.now() - t1).toFixed(3), "ms");
+        return data;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+};
