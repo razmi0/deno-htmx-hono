@@ -27,6 +27,13 @@ export default {
         }, "updateTodo");
     },
 
+    updateAllTodos: async (todos: Todo[]): Promise<Todo[] | false> => {
+        return await safe(async () => {
+            await write(JSON.stringify(todos));
+            return todos;
+        }, "updateAllTodos");
+    },
+
     /* Delete a todo */
     deleteTodo: async (id: number): Promise<Todo[] | false> => {
         return await safe(async () => {

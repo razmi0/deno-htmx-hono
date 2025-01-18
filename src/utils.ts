@@ -8,7 +8,7 @@ export function getBodyFunction(fn: (...args: any) => any): string {
     const withLastBracket = fn.toString().replace(reg, "");
     const lastIndex = withLastBracket.lastIndexOf("}");
     const withoutLastBracket = withLastBracket.substring(0, lastIndex);
-    return withoutLastBracket.replace(/(\s|\n)/g, "");
+    return withoutLastBracket.replace(/(\n)/g, "");
 }
 
 /**

@@ -1,59 +1,82 @@
-import { Header } from "@/components/Header.tsx";
 import db from "@/db/index.ts";
 import { getBodyFunction, parseFd } from "@/utils.ts";
-import { DeleteIcon } from "@components/icons/DeleteIcon.tsx";
+import { Checkbox } from "@components/ui/Checkbox.tsx";
 import { Container as Card } from "@components/ui/Container.tsx";
-import { Layout } from "@pages/layout/Layout.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { Header } from "../components/ui/Header.tsx";
+import { DeleteIcon, PlusIcon } from "../components/ui/Icons.tsx";
+import { Layout } from "./Layout.tsx";
+
+type TodoKey = `todo-${number}` | `title-${number}` | `completed-${number}`;
 
 type TodoRequest = {
-    title: string;
-    completed: "on" | undefined;
+    [key in TodoKey]: string | "on" | undefined;
 };
 
-/* <form
-                    class={"grid grid-cols-2 gap-2 justify-items-end text-left"}
-                    hx-post="/todos"
-                    hx-target="formTarget">
-                    <AddTodo formTarget={formTarget} />
-                </form> */
+type AddTodoRequest = {
+    title: string;
+    completed: string;
+};
 
-const Todo = ({ id, title, completed }: Todo) => {
-    /* Executed in client side
-     * event is a htmx event
-     * this is the form element */
-    const onBeforeRequest = (event: Event) => {
-        console.log(event);
-        console.log(this);
-    };
-
+const AddTodo = () => {
     return (
-        <Card id={`todo-${id}`}>
+        <Card className="mt-5">
             <form
-                class={"flex items-center justify-between gap-3"}
-                hx-put={`/todos/${id}`}
-                hx-swap={"outerHTML"}
-                hx-trigger={"change"}
-                hx-target={`#todo-${id}`}
-                hx-on-htmx-before-request={getBodyFunction(onBeforeRequest)}>
-                <input type="text" value={title} name="title" class="bg-transparent p-0 w-[40ch]" />
-                <input type="checkbox" name="completed" checked={completed} />
-                <button
-                    class="bg-transparent p-0"
-                    type="submit"
-                    hx-delete={`/todos/${id}`}
-                    hx-target={`#todo-${id}`}
-                    hx-swap="outerHTML">
-                    <DeleteIcon className="size-5" />
+                class="flex items-center justify-between gap-3"
+                hx-post="/todos"
+                hx-swap="outerHTML"
+                hx-target={"output#added"}>
+                <input type="text" placeholder="Add todo.." class="bg-transparent p-0 w-[40ch]" name="title" />
+                <Checkbox />
+                <button class="bg-transparent p-0" type="submit">
+                    <PlusIcon className="size-5" />
                 </button>
             </form>
         </Card>
     );
 };
 
+const Todo = ({ id, title, completed }: Todo) => {
+    /* Executed in client side
+     * "event" is a custom Event(htmx event)
+     * "this" is the form element */
+    const onBeforeRequest = getBodyFunction((event: Event) => {
+        console.log(event);
+        this as unknown as HTMLElement;
+        console.log(this);
+    });
+
+    return (
+        <Card id={`todo-${id}`}>
+            <div class="flex items-center justify-between gap-3">
+                <input type="text" class={"hidden"} name={`todo-${id}`} value={id} />
+                <input type="text" value={title} name={`title-${id}`} class="bg-transparent p-0 w-[40ch]" />
+                <Checkbox checked={completed} name={`completed-${id}`} />
+                <button
+                    class="bg-transparent p-0"
+                    hx-delete={`/todos/${id}`}
+                    hx-target={`#todo-${id}`}
+                    hx-swap="outerHTML">
+                    <DeleteIcon className="size-5" />
+                </button>
+            </div>
+        </Card>
+    );
+};
+
+const Todolist = ({ todos }: { todos: Todo[] }) => {
+    return (
+        <form class="sortable" hx-put="/todos" hx-swap="outerHTML" hx-trigger={"change, keydown[Enter]"}>
+            {todos.map((td) => (
+                <Todo {...td} />
+            ))}
+            <output id="added" class={"hidden"}></output>
+        </form>
+    );
+};
+
 export default new Hono()
-    .basePath("/")
     .use(logger())
     /* GET todos page */
     .get("/", async (c) => {
@@ -63,27 +86,57 @@ export default new Hono()
                 <Header />
                 <main>
                     <h1>Todos</h1>
-                    {todos && todos.length > 0 ? todos.map((td) => <Todo {...td} />) : <>No todos found</>}
+                    {todos && todos.length > 0 ? <Todolist todos={todos} /> : <>No todos found</>}
+                    <AddTodo />
                 </main>
             </Layout>
         );
     })
-    /* POST todo */
-    .put("/:id", async (c) => {
-        const todos = await db.readTodos();
-        if (!todos) throw new Error("Failed to read todos !");
-
-        const { title, completed } = await parseFd<TodoRequest>(c);
+    /* post todo */
+    .post("/", async (c) => {
+        console.log(await c.req.formData());
+        const { title, completed } = await parseFd<AddTodoRequest>(c);
         const newTodo = {
-            id: parseInt(c.req.param("id")),
             title,
-            completed: !!completed, // convert to boolean the TodoRequest.completed
+            completed: !!completed,
         };
 
-        const updated = await db.updateTodo(newTodo);
-        if (!updated) throw new Error("Failed to update todo !");
+        const id = await db.createTodo(newTodo);
+        if (!id) throw new Error("Failed to create todo !");
 
-        return c.render(<Todo {...newTodo} />);
+        return c.render(
+            <>
+                <Todo {...newTodo} id={id} />
+                <output id="added" class={"hidden"}></output>
+            </>
+        );
+    })
+    /* update todos (input change and sorting events) */
+    .put("/", async (c) => {
+        const data = await parseFd<TodoRequest>(c);
+        const groupedTodos = Object.entries(data).reduce((result, [key, value]) => {
+            const match = key.match(/(todo|title|completed)-(\d+)/);
+            if (!match) return result;
+
+            const [, field, id] = match;
+            if (!result[id]) {
+                result[id] = { id, title: "", completed: false };
+            }
+
+            if (field === "title") {
+                result[id].title = value;
+            } else if (field === "completed") {
+                result[id].completed = true;
+            }
+
+            return result;
+        }, {});
+
+        const todos = Object.values(groupedTodos) as Todo[];
+        const updated = await db.updateAllTodos(todos);
+        if (!updated) throw new Error("Failed to update todos !");
+
+        return c.render(<Todolist todos={updated} />);
     })
 
     /* DELETE todo */

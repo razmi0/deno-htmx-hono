@@ -1,15 +1,10 @@
-/* eslint @typescript-eslint/no-explicit-any: "off" */
 console.log('hono@^4.6.16", htmx.org@2.0.4', "deno@2.1.5");
-// htmx.logAll();
 
-// @ts-ignore htmx is exposed
-htmx.onLoad(function (content) {
-    console.log("htmx loaded", content);
-
-    const sortables = content.querySelectorAll(".sortable");
+htmx.onLoad(function (content: any) {
+    const sortables = document.querySelectorAll(".sortable") as NodeListOf<HTMLElement>;
+    const form = sortables[0];
     for (let i = 0; i < sortables.length; i++) {
         const sortable = sortables[i];
-        //@ts-ignore Sortable is available
         const sortableInstance = new Sortable(sortable, {
             animation: 150,
             ghostClass: "blue-background-class",
@@ -17,22 +12,27 @@ htmx.onLoad(function (content) {
             // Make the `.htmx-indicator` unsortable
             filter: ".htmx-indicator",
             onMove: function (evt: any) {
+                console.log("move");
                 return evt.related.className.indexOf("htmx-indicator") === -1;
             },
 
             // Disable sorting on the `end` event
             onEnd: function (_evt: any) {
                 this.option("disabled", true);
+                // htmx.trigger(form, "change");
             },
         });
 
         // Re-enable sorting on the `htmx:afterSwap` event
-        sortable.addEventListener("htmx:afterSwap", function () {
+        sortable.addEventListener("htmx:afterSwap", function (evt: any) {
             sortableInstance.option("disabled", false);
         });
     }
 });
 
+/*
+ * Focus the next input on Enter key press and prevent form submission
+ */
 document.body.addEventListener("keydown", function (evt) {
     if (evt.key !== "Enter") return;
     evt.preventDefault();
@@ -40,12 +40,11 @@ document.body.addEventListener("keydown", function (evt) {
     const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
     if (!isInput) return;
     target.blur();
-    const nextInput = target.closest("article")?.nextElementSibling?.querySelector("input") as HTMLInputElement;
+    const nextInput = target.closest("li")?.nextElementSibling?.querySelector("input") as HTMLInputElement;
     if (!nextInput) {
-        const firstInput = document.querySelector(`article input`) as HTMLInputElement;
+        const firstInput = document.querySelector(`li article form input`) as HTMLInputElement;
         if (!firstInput) return;
         firstInput.focus();
     }
-
     nextInput.focus();
 });
