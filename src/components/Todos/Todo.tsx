@@ -18,7 +18,7 @@ export const Todolist = ({ todos }: { todos: Todo[] }) => {
             className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg group">
             <p class={`text-center visible group-[:has(article)]:invisible`}>No todos found</p>
             {todos.map((td) => (
-                <Todo {...td} className="peer" />
+                <Todo {...td} />
             ))}
         </Form>
     );
