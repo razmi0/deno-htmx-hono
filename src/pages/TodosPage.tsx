@@ -1,14 +1,10 @@
 import db from "@/db/index.ts";
 import { parseFd } from "@/utils.ts";
-import { Button } from "../components/Button.tsx";
-import { Checkbox } from "../components/Checkbox.tsx";
-import { Container } from "../components/Container.tsx";
-import { Input } from "../components/Input.tsx";
+import { Header } from "@components/Header.tsx";
+import { AddTodo, Todo, Todolist } from "@components/Todos/Todo.tsx";
+import { Layout } from "@pages/Layout.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { Header } from "../components/Header.tsx";
-import { DeleteIcon, HandleIcon, PlusIcon } from "../components/Icons.tsx";
-import { Layout } from "./Layout.tsx";
 
 type TodoKey = `todo-${number}` | `title-${number}` | `completed-${number}`;
 
@@ -21,75 +17,12 @@ type AddTodoRequest = {
     completed: string;
 };
 
-const AddTodo = () => {
+const Main = ({ children }: { children: any }) => {
     return (
-        <Container className="mt-5">
-            <form
-                class="flex items-center justify-between gap-3"
-                hx-post="/todos"
-                hx-swap="outerHTML"
-                hx-target={"output#added"}>
-                <input type="text" placeholder="Add todo.." class="bg-transparent p-0 w-[40ch]" name="title" />
-                <Checkbox />
-                <button class="bg-transparent p-0" type="submit">
-                    <PlusIcon className="size-5" />
-                </button>
-            </form>
-        </Container>
-    );
-};
-
-const Todo = ({ id, title, completed }: Todo) => {
-    /* Executed in client side
-     * "event" is a custom Event(htmx event)
-     * "this" is the form element */
-    // const onBeforeRequest = getBodyFunction((event: Event) => {
-    //     console.log(event);
-    //     this as unknown as HTMLElement;
-    //     console.log(this);
-    // });
-
-    const hxProps: Record<"button" | "input", HTMXProps> = {
-        button: {
-            "hx-delete": `/todos/${id}`,
-            "hx-target": `closest form`,
-            "hx-swap": "outerHTML",
-        },
-        input: {
-            "hx-trigger": "change",
-            "hx-put": "/todos",
-            "hx-swap": "outerHTML",
-            "hx-target": `closest form`,
-        },
-    };
-
-    return (
-        <Container id={`todo-${id}`}>
-            <div class="flex items-center justify-between gap-3">
-                <HandleIcon />
-                <Input name={`todo-${id}`} value={id} variant="hidden" />
-                <Input name={`title-${id}`} value={title} hxProps={hxProps.input} />
-                <Checkbox checked={completed} name={`completed-${id}`} hxProps={hxProps.input} />
-                <Button variant="ghost" hxProps={hxProps.button}>
-                    <DeleteIcon className="size-5" />
-                </Button>
-            </div>
-        </Container>
-    );
-};
-
-const Todolist = ({ todos }: { todos: Todo[] }) => {
-    return (
-        <form
-            class="sortable [&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg"
-            hx-put="/todos"
-            hx-swap="outerHTML"
-            hx-trigger="end">
-            {todos.map((td) => (
-                <Todo {...td} />
-            ))}
-            <output id="added" class={"hidden"}></output>
-        </form>
+        <main>
+            <h1>Todos</h1>
+            {children}
+        </main>
     );
 };
 
@@ -101,11 +34,10 @@ export default new Hono()
         return c.render(
             <Layout title="Todos">
                 <Header />
-                <main>
-                    <h1>Todos</h1>
+                <Main>
                     {todos && todos.length > 0 ? <Todolist todos={todos} /> : <>No todos found</>}
                     <AddTodo />
-                </main>
+                </Main>
             </Layout>
         );
     })
@@ -164,10 +96,7 @@ export default new Hono()
     .delete("/:id", async (c) => {
         const todos = await db.readTodos();
         if (!todos) throw new Error("Failed to read todos !");
-
         const id = c.req.param("id");
-        console.log(typeof id, id);
-
         const updated = await db.deleteTodo(id);
         if (!updated) throw new Error("Failed to delete todo !");
 
