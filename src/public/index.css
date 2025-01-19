@@ -85,3 +85,11 @@ body {
     border-radius: 0 !important;
     box-shadow: 0 0 0 2px #333 !important;
 }
+
+.no-todos-info {
+    display: block;
+}
+
+.no-todos-info:has(+ *) {
+    display: none;
+}

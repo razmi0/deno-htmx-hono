@@ -12,24 +12,19 @@ export const Todolist = ({ todos }: { todos: Todo[] }) => {
         "hx-trigger": "end",
     };
     return (
-        <>
-            {!todos || todos.length === 0 ? (
-                <p>No todos found</p>
-            ) : (
-                <Form
-                    isSortable
-                    hxProps={hxProps}
-                    className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg">
-                    {todos.map((td) => (
-                        <Todo {...td} />
-                    ))}
-                </Form>
-            )}
-        </>
+        <Form
+            isSortable
+            hxProps={hxProps}
+            className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg group">
+            <p class={`text-center visible group-[:has(article)]:invisible`}>No todos found</p>
+            {todos.map((td) => (
+                <Todo {...td} className="peer" />
+            ))}
+        </Form>
     );
 };
 
-export const Todo = ({ id, title, completed }: Todo) => {
+export const Todo = ({ id, title, completed, className }: Todo & { className?: string }) => {
     const hxProps: Record<"button" | "input", HTMXProps> = {
         button: {
             "hx-delete": `/todos/${id}`,
@@ -45,7 +40,7 @@ export const Todo = ({ id, title, completed }: Todo) => {
     };
 
     return (
-        <Container id={`todo-${id}`}>
+        <Container id={`todo-${id}`} className={className}>
             <div class="flex items-center justify-between gap-3">
                 <HandleIcon />
                 <Input name={`todo-${id}`} value={id} variant="hidden" />

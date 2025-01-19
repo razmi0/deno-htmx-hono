@@ -69,13 +69,12 @@ export default new Hono()
     /* post todo */
     .post("/", async (c) => {
         const { title, completed } = await parseFd<AddTodoData>(c);
-        const newTodo = {
+        const id = await db.createTodo({
             title,
             completed: !!completed,
-        };
-        const id = await db.createTodo(newTodo);
+        });
         if (!id) throw new Error("Failed to create todo !");
-        return c.render(<Todo {...newTodo} id={id} />);
+        return c.render(<Todo title={title} completed={!!completed} id={id} />);
     })
     /* update todos (input change and sorting events) */
     .put("/", async (c) => {
