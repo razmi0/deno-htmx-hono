@@ -8,6 +8,8 @@ declare class Sortable {
         options: {
             animation?: number;
             ghostClass?: string;
+            handle?: string;
+            dragClass?: string;
             filter?: string;
             onMove?: (evt: any) => boolean;
             onEnd?: (evt: any) => void;
