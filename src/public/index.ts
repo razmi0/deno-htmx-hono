@@ -1,6 +1,7 @@
 console.log('hono@^4.6.16", htmx.org@2.0.4', "deno@2.1.5");
 
 htmx.onLoad(function (content: any) {
+    console.log("onLoad");
     const sortables = document.querySelectorAll(".sortable") as NodeListOf<HTMLElement>;
     const form = sortables[0];
     for (let i = 0; i < sortables.length; i++) {
@@ -8,6 +9,8 @@ htmx.onLoad(function (content: any) {
         const sortableInstance = new Sortable(sortable, {
             animation: 150,
             ghostClass: "blue-background-class",
+            handle: ".handle",
+            dragClass: "sortable-dragged",
 
             // Make the `.htmx-indicator` unsortable
             filter: ".htmx-indicator",
@@ -18,7 +21,7 @@ htmx.onLoad(function (content: any) {
 
             // Disable sorting on the `end` event
             onEnd: function (_evt: any) {
-                this.option("disabled", true);
+                // this.option("disabled", true);
                 // htmx.trigger(form, "change");
             },
         });

@@ -27,3 +27,24 @@ export const PlusIcon = ({ className }: { className: string }) => (
         </g>
     </svg>
 );
+
+export const HandleIcon = ({ className }: { className?: string }) => (
+    <svg
+        class={"cursor-grab size-5 handle " + className || ""}
+        viewBox="0 0 16 16"
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5">
+        <g stroke-width="0"></g>
+        <g stroke-linecap="round" stroke-linejoin="round"></g>
+        <g>
+            <circle cy="2.5" cx="5.5" r=".75"></circle> <circle cy="8" cx="5.5" r=".75"></circle>
+            <circle cy="13.5" cx="5.5" r=".75"></circle> <circle cy="2.5" cx="10.4957" r=".75"></circle>
+            <circle cy="8" cx="10.4957" r=".75"></circle> <circle cy="13.5" cx="10.4957" r=".75"></circle>
+        </g>
+    </svg>
+);

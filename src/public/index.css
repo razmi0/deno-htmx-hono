@@ -80,3 +80,8 @@ body {
         box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
     }
 }
+
+.sortable-dragged {
+    border-radius: 0 !important;
+    box-shadow: 0 0 0 2px #333 !important;
+}

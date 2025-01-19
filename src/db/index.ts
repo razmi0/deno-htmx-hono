@@ -35,9 +35,10 @@ export default {
     },
 
     /* Delete a todo */
-    deleteTodo: async (id: number): Promise<Todo[] | false> => {
+    deleteTodo: async (id: string): Promise<Todo[] | false> => {
         return await safe(async () => {
             const oldTodos = JSON.parse(decode(await read()) || "[]");
+            console.log(oldTodos);
             const newTodos = oldTodos.filter((oldTodo: Todo) => oldTodo.id !== id);
             await write(JSON.stringify(newTodos));
             return newTodos;
@@ -45,13 +46,13 @@ export default {
     },
 
     /* Create a todo */
-    createTodo: async (todo: Partial<Todo>): Promise<number | false> => {
+    createTodo: async (todo: Partial<Todo>): Promise<string | false> => {
         return await safe(async () => {
             const oldTodos = JSON.parse(decode(await read()) || "[]");
-            const newTodo = {
+            const newTodo: Todo = {
                 completed: todo.completed || false,
                 title: todo.title || "blank",
-                id: oldTodos.length + 1,
+                id: `${oldTodos.length + 1}`,
             };
             const newTodos = [...oldTodos, newTodo];
             await write(JSON.stringify(newTodos));

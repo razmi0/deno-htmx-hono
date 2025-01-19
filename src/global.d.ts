@@ -11,7 +11,7 @@ declare module "hono/jsx" {
 
 declare global {
     type Todo = {
-        id: number;
+        id: string;
         title: string;
         completed: boolean;
     };

@@ -1,11 +1,11 @@
 import db from "@/db/index.ts";
 import { getBodyFunction, parseFd } from "@/utils.ts";
 import { Checkbox } from "@components/ui/Checkbox.tsx";
-import { Container as Card } from "@components/ui/Container.tsx";
+import { Container } from "@components/ui/Container.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { Header } from "../components/ui/Header.tsx";
-import { DeleteIcon, PlusIcon } from "../components/ui/Icons.tsx";
+import { DeleteIcon, HandleIcon, PlusIcon } from "../components/ui/Icons.tsx";
 import { Layout } from "./Layout.tsx";
 
 type TodoKey = `todo-${number}` | `title-${number}` | `completed-${number}`;
@@ -21,7 +21,7 @@ type AddTodoRequest = {
 
 const AddTodo = () => {
     return (
-        <Card className="mt-5">
+        <Container className="mt-5">
             <form
                 class="flex items-center justify-between gap-3"
                 hx-post="/todos"
@@ -33,7 +33,7 @@ const AddTodo = () => {
                     <PlusIcon className="size-5" />
                 </button>
             </form>
-        </Card>
+        </Container>
     );
 };
 
@@ -48,26 +48,31 @@ const Todo = ({ id, title, completed }: Todo) => {
     });
 
     return (
-        <Card id={`todo-${id}`}>
+        <Container id={`todo-${id}`}>
             <div class="flex items-center justify-between gap-3">
+                <HandleIcon />
                 <input type="text" class={"hidden"} name={`todo-${id}`} value={id} />
                 <input type="text" value={title} name={`title-${id}`} class="bg-transparent p-0 w-[40ch]" />
                 <Checkbox checked={completed} name={`completed-${id}`} />
                 <button
                     class="bg-transparent p-0"
                     hx-delete={`/todos/${id}`}
-                    hx-target={`#todo-${id}`}
+                    hx-target={`closest form`}
                     hx-swap="outerHTML">
                     <DeleteIcon className="size-5" />
                 </button>
             </div>
-        </Card>
+        </Container>
     );
 };
 
 const Todolist = ({ todos }: { todos: Todo[] }) => {
     return (
-        <form class="sortable" hx-put="/todos" hx-swap="outerHTML" hx-trigger={"change, keydown[Enter]"}>
+        <form
+            class="sortable [&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg"
+            hx-put="/todos"
+            hx-swap="outerHTML"
+            hx-trigger="end">
             {todos.map((td) => (
                 <Todo {...td} />
             ))}
@@ -114,25 +119,29 @@ export default new Hono()
     /* update todos (input change and sorting events) */
     .put("/", async (c) => {
         const data = await parseFd<TodoRequest>(c);
-        const groupedTodos = Object.entries(data).reduce((result, [key, value]) => {
+        const todos = Object.entries(data).reduce((result: Todo[], [key, value]) => {
             const match = key.match(/(todo|title|completed)-(\d+)/);
             if (!match) return result;
 
             const [, field, id] = match;
-            if (!result[id]) {
-                result[id] = { id, title: "", completed: false };
+
+            // Find the existing todo by ID, or create a new one
+            let todo = result.find((item) => item.id === id);
+            if (!todo) {
+                todo = { id, title: "", completed: false };
+                result.push(todo); // Add to the result array to maintain order
             }
 
+            // Update the fields based on the key
             if (field === "title") {
-                result[id].title = value;
+                todo.title = value as string;
             } else if (field === "completed") {
-                result[id].completed = true;
+                todo.completed = value === "on";
             }
 
             return result;
-        }, {});
+        }, [] as Todo[]);
 
-        const todos = Object.values(groupedTodos) as Todo[];
         const updated = await db.updateAllTodos(todos);
         if (!updated) throw new Error("Failed to update todos !");
 
@@ -144,10 +153,11 @@ export default new Hono()
         const todos = await db.readTodos();
         if (!todos) throw new Error("Failed to read todos !");
 
-        const id = parseInt(c.req.param("id"));
+        const id = c.req.param("id");
+        console.log(typeof id, id);
 
-        const deleted = db.deleteTodo(id);
-        if (!deleted) throw new Error("Failed to delete todo !");
+        const updated = await db.deleteTodo(id);
+        if (!updated) throw new Error("Failed to delete todo !");
 
-        return new Response();
+        return c.render(<Todolist todos={updated} />);
     });
