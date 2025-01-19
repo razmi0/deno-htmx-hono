@@ -1,10 +1,10 @@
-import { Container } from "@components/ui/Container.tsx";
+import { Container } from "../components/Container.tsx";
 import counterRoutes from "@pages/CounterPage.tsx";
 import { Layout } from "@pages/Layout.tsx";
 import todosRoutes from "@pages/TodosPage.tsx";
 import { Hono } from "hono";
 import { jsxRenderer } from "hono/jsx-renderer";
-import { Header } from "../components/ui/Header.tsx";
+import { Header } from "../components/Header.tsx";
 
 /**
  * application routes

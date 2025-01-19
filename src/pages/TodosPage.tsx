@@ -1,13 +1,13 @@
 import db from "@/db/index.ts";
 import { parseFd } from "@/utils.ts";
-import { Button } from "@components/ui/Button.tsx";
-import { Checkbox } from "@components/ui/Checkbox.tsx";
-import { Container } from "@components/ui/Container.tsx";
-import { Input } from "@components/ui/Input.tsx";
+import { Button } from "../components/Button.tsx";
+import { Checkbox } from "../components/Checkbox.tsx";
+import { Container } from "../components/Container.tsx";
+import { Input } from "../components/Input.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { Header } from "../components/ui/Header.tsx";
-import { DeleteIcon, HandleIcon, PlusIcon } from "../components/ui/Icons.tsx";
+import { Header } from "../components/Header.tsx";
+import { DeleteIcon, HandleIcon, PlusIcon } from "../components/Icons.tsx";
 import { Layout } from "./Layout.tsx";
 
 type TodoKey = `todo-${number}` | `title-${number}` | `completed-${number}`;

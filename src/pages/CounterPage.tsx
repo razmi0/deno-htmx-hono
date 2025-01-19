@@ -1,5 +1,5 @@
 import Counter from "@components/Counter.tsx";
-import { Header } from "../components/ui/Header.tsx";
+import { Header } from "../components/Header.tsx";
 import { Layout } from "@pages/Layout.tsx";
 import { Hono } from "hono";
 
