@@ -1,7 +1,9 @@
 import db from "@/db/index.ts";
-import { getBodyFunction, parseFd } from "@/utils.ts";
+import { parseFd } from "@/utils.ts";
+import { Button } from "@components/ui/Button.tsx";
 import { Checkbox } from "@components/ui/Checkbox.tsx";
 import { Container } from "@components/ui/Container.tsx";
+import { Input } from "@components/ui/Input.tsx";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { Header } from "../components/ui/Header.tsx";
@@ -41,26 +43,36 @@ const Todo = ({ id, title, completed }: Todo) => {
     /* Executed in client side
      * "event" is a custom Event(htmx event)
      * "this" is the form element */
-    const onBeforeRequest = getBodyFunction((event: Event) => {
-        console.log(event);
-        this as unknown as HTMLElement;
-        console.log(this);
-    });
+    // const onBeforeRequest = getBodyFunction((event: Event) => {
+    //     console.log(event);
+    //     this as unknown as HTMLElement;
+    //     console.log(this);
+    // });
+
+    const hxProps: Record<"button" | "input", HTMXProps> = {
+        button: {
+            "hx-delete": `/todos/${id}`,
+            "hx-target": `closest form`,
+            "hx-swap": "outerHTML",
+        },
+        input: {
+            "hx-trigger": "change",
+            "hx-put": "/todos",
+            "hx-swap": "outerHTML",
+            "hx-target": `closest form`,
+        },
+    };
 
     return (
         <Container id={`todo-${id}`}>
             <div class="flex items-center justify-between gap-3">
                 <HandleIcon />
-                <input type="text" class={"hidden"} name={`todo-${id}`} value={id} />
-                <input type="text" value={title} name={`title-${id}`} class="bg-transparent p-0 w-[40ch]" />
-                <Checkbox checked={completed} name={`completed-${id}`} />
-                <button
-                    class="bg-transparent p-0"
-                    hx-delete={`/todos/${id}`}
-                    hx-target={`closest form`}
-                    hx-swap="outerHTML">
+                <Input name={`todo-${id}`} value={id} variant="hidden" />
+                <Input name={`title-${id}`} value={title} hxProps={hxProps.input} />
+                <Checkbox checked={completed} name={`completed-${id}`} hxProps={hxProps.input} />
+                <Button variant="ghost" hxProps={hxProps.button}>
                     <DeleteIcon className="size-5" />
-                </button>
+                </Button>
             </div>
         </Container>
     );
