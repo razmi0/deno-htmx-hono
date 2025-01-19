@@ -15,4 +15,14 @@ declare global {
         title: string;
         completed: boolean;
     };
+
+    // type HTMXProps = {
+    //     [key in keyof HtmxAttributes]?: string;
+    // } & {
+    //     "hx-boost"?: BoolStr;
+    // };
+
+    type HTMXProps = {
+        [K in keyof HtmxAttributes]?: HtmxAttributes[K];
+    };
 }
