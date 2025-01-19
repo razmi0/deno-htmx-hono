@@ -12,15 +12,20 @@ export const Todolist = ({ todos }: { todos: Todo[] }) => {
         "hx-trigger": "end",
     };
     return (
-        <Form
-            isSortable
-            hxProps={hxProps}
-            className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg">
-            {todos.map((td) => (
-                <Todo {...td} />
-            ))}
-            <output id="added" class={"hidden"}></output>
-        </Form>
+        <>
+            {!todos || todos.length === 0 ? (
+                <p>No todos found</p>
+            ) : (
+                <Form
+                    isSortable
+                    hxProps={hxProps}
+                    className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg">
+                    {todos.map((td) => (
+                        <Todo {...td} />
+                    ))}
+                </Form>
+            )}
+        </>
     );
 };
 
@@ -57,8 +62,8 @@ export const Todo = ({ id, title, completed }: Todo) => {
 export const AddTodo = () => {
     const hxProps = {
         "hx-post": "/todos",
-        "hx-swap": "outerHTML",
-        "hx-target": "output#added",
+        "hx-swap": "beforeend",
+        "hx-target": "previous form",
     };
     return (
         <Container className="mt-5">

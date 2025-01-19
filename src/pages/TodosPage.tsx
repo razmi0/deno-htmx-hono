@@ -8,11 +8,11 @@ import { logger } from "hono/logger";
 
 type TodoKey = `todo-${number}` | `title-${number}` | `completed-${number}`;
 
-type TodoRequest = {
+type UpdateTodoData = {
     [key in TodoKey]: string | "on" | undefined;
 };
 
-type AddTodoRequest = {
+type AddTodoData = {
     title: string;
     completed: string;
 };
@@ -26,6 +26,31 @@ const Main = ({ children }: { children: any }) => {
     );
 };
 
+const fromForm = (data: UpdateTodoData): Todo[] => {
+    return Object.entries(data).reduce((result: Todo[], [key, value]) => {
+        const match = key.match(/(todo|title|completed)-(\d+)/);
+        if (!match) return result;
+
+        const [, field, id] = match;
+
+        // Find the existing todo by ID, or create a new one
+        let todo = result.find((item) => item.id === id);
+        if (!todo) {
+            todo = { id, title: "", completed: false };
+            result.push(todo); // Add to the result array to maintain order
+        }
+
+        // Update the fields based on the key
+        if (field === "title") {
+            todo.title = value as string;
+        } else if (field === "completed") {
+            todo.completed = value === "on";
+        }
+
+        return result;
+    }, [] as Todo[]);
+};
+
 export default new Hono()
     .use(logger())
     /* GET todos page */
@@ -35,7 +60,7 @@ export default new Hono()
             <Layout title="Todos">
                 <Header />
                 <Main>
-                    {todos && todos.length > 0 ? <Todolist todos={todos} /> : <>No todos found</>}
+                    {todos ? <Todolist todos={todos} /> : <>No todos found</>}
                     <AddTodo />
                 </Main>
             </Layout>
@@ -43,52 +68,21 @@ export default new Hono()
     })
     /* post todo */
     .post("/", async (c) => {
-        console.log(await c.req.formData());
-        const { title, completed } = await parseFd<AddTodoRequest>(c);
+        const { title, completed } = await parseFd<AddTodoData>(c);
         const newTodo = {
             title,
             completed: !!completed,
         };
-
         const id = await db.createTodo(newTodo);
         if (!id) throw new Error("Failed to create todo !");
-
-        return c.render(
-            <>
-                <Todo {...newTodo} id={id} />
-                <output id="added" class={"hidden"}></output>
-            </>
-        );
+        return c.render(<Todo {...newTodo} id={id} />);
     })
     /* update todos (input change and sorting events) */
     .put("/", async (c) => {
-        const data = await parseFd<TodoRequest>(c);
-        const todos = Object.entries(data).reduce((result: Todo[], [key, value]) => {
-            const match = key.match(/(todo|title|completed)-(\d+)/);
-            if (!match) return result;
-
-            const [, field, id] = match;
-
-            // Find the existing todo by ID, or create a new one
-            let todo = result.find((item) => item.id === id);
-            if (!todo) {
-                todo = { id, title: "", completed: false };
-                result.push(todo); // Add to the result array to maintain order
-            }
-
-            // Update the fields based on the key
-            if (field === "title") {
-                todo.title = value as string;
-            } else if (field === "completed") {
-                todo.completed = value === "on";
-            }
-
-            return result;
-        }, [] as Todo[]);
-
+        const data = await parseFd<UpdateTodoData>(c);
+        const todos = fromForm(data);
         const updated = await db.updateAllTodos(todos);
         if (!updated) throw new Error("Failed to update todos !");
-
         return c.render(<Todolist todos={updated} />);
     })
 
@@ -100,6 +94,5 @@ export default new Hono()
         console.log("Deleting todo with id: ", id);
         const updated = await db.deleteTodo(id);
         if (!updated) throw new Error("Failed to delete todo !");
-
         return c.render(<Todolist todos={updated} />);
     });
