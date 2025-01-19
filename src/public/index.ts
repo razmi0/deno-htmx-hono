@@ -1,9 +1,7 @@
 console.log('hono@^4.6.16", htmx.org@2.0.4', "deno@2.1.5");
 
-htmx.onLoad(function (content: any) {
-    console.log("onLoad");
+htmx.onLoad(function (_content: any) {
     const sortables = document.querySelectorAll(".sortable") as NodeListOf<HTMLElement>;
-    const form = sortables[0];
     for (let i = 0; i < sortables.length; i++) {
         const sortable = sortables[i];
         const sortableInstance = new Sortable(sortable, {
@@ -11,23 +9,13 @@ htmx.onLoad(function (content: any) {
             ghostClass: "blue-background-class",
             handle: ".handle",
             dragClass: "sortable-dragged",
-
             // Make the `.htmx-indicator` unsortable
             filter: ".htmx-indicator",
-            onMove: function (evt: any) {
-                console.log("move");
-                return evt.related.className.indexOf("htmx-indicator") === -1;
-            },
-
-            // Disable sorting on the `end` event
-            onEnd: function (_evt: any) {
-                // this.option("disabled", true);
-                // htmx.trigger(form, "change");
-            },
+            onMove: (evt: any) => evt.related.className.indexOf("htmx-indicator") === -1,
         });
 
         // Re-enable sorting on the `htmx:afterSwap` event
-        sortable.addEventListener("htmx:afterSwap", function (evt: any) {
+        sortable.addEventListener("htmx:afterSwap", () => {
             sortableInstance.option("disabled", false);
         });
     }
