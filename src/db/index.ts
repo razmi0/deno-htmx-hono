@@ -38,7 +38,6 @@ export default {
     deleteTodo: async (id: string): Promise<Todo[] | false> => {
         return await safe(async () => {
             const oldTodos = JSON.parse(decode(await read()) || "[]");
-            console.log(oldTodos);
             const newTodos = oldTodos.filter((oldTodo: Todo) => oldTodo.id !== id);
             await write(JSON.stringify(newTodos));
             return newTodos;

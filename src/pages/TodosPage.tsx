@@ -97,6 +97,7 @@ export default new Hono()
         const todos = await db.readTodos();
         if (!todos) throw new Error("Failed to read todos !");
         const id = c.req.param("id");
+        console.log("Deleting todo with id: ", id);
         const updated = await db.deleteTodo(id);
         if (!updated) throw new Error("Failed to delete todo !");
 

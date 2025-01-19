@@ -5,22 +5,22 @@ import { Container } from "@components/Todos/Container.tsx";
 import { Form } from "@components/Todos/Form.tsx";
 import { Input } from "@components/Todos/Input.tsx";
 
-export const AddTodo = () => {
+export const Todolist = ({ todos }: { todos: Todo[] }) => {
     const hxProps = {
-        "hx-post": "/todos",
+        "hx-put": "/todos",
         "hx-swap": "outerHTML",
-        "hx-target": "output#added",
+        "hx-trigger": "end",
     };
     return (
-        <Container className="mt-5">
-            <Form className="flex items-center justify-between gap-3" hxProps={hxProps}>
-                <Input placeholder="Add todo.." name="title" />
-                <Checkbox />
-                <Button type="submit">
-                    <PlusIcon className="size-5" />
-                </Button>
-            </Form>
-        </Container>
+        <Form
+            isSortable
+            hxProps={hxProps}
+            className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg">
+            {todos.map((td) => (
+                <Todo {...td} />
+            ))}
+            <output id="added" class={"hidden"}></output>
+        </Form>
     );
 };
 
@@ -54,21 +54,21 @@ export const Todo = ({ id, title, completed }: Todo) => {
     );
 };
 
-export const Todolist = ({ todos }: { todos: Todo[] }) => {
+export const AddTodo = () => {
     const hxProps = {
-        "hx-put": "/todos",
+        "hx-post": "/todos",
         "hx-swap": "outerHTML",
-        "hx-trigger": "end",
+        "hx-target": "output#added",
     };
     return (
-        <Form
-            isSortable
-            hxProps={hxProps}
-            className="[&>article:first-of-type]:rounded-t-lg [&>article:last-of-type]:rounded-b-lg">
-            {todos.map((td) => (
-                <Todo {...td} />
-            ))}
-            <output id="added" class={"hidden"}></output>
-        </Form>
+        <Container className="mt-5">
+            <Form className="flex items-center justify-between gap-3" hxProps={hxProps}>
+                <Input placeholder="Add todo.." name="title" />
+                <Checkbox />
+                <Button type="submit">
+                    <PlusIcon className="size-5" />
+                </Button>
+            </Form>
+        </Container>
     );
 };
