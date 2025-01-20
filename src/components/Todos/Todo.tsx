@@ -42,6 +42,7 @@ export const Todo = ({ id, title, completed, className }: Todo & { className?: s
     return (
         <Container id={`todo-${id}`} className={className}>
             <div class="flex items-center justify-between gap-3">
+                <p class={"m-0 p-0"}>{id}</p>
                 <HandleIcon />
                 <Input name={`todo-${id}`} value={id} variant="hidden" />
                 <Input name={`title-${id}`} value={title} hxProps={hxProps.input} />
